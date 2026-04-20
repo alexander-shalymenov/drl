@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: "DRL — Deterministic Resolution Layer"
+message: "If you use this concept, please cite this repository."
+type: software
+authors:
+  - family-names: "Shalymenov"
+    given-names: "Alexander"
+version: "1.1.0"
+date-released: "2026-04-19"
+license: "MIT"

@@ -1,0 +1,20 @@
+{
+  "name": "drl-layer",
+  "version": "1.1.0",
+  "description": "Deterministic Resolution Layer (DRL) by Alexander Shalymenov",
+  "main": "drl.js",
+  "scripts": {
+    "examples": "node examples.js"
+  },
+  "keywords": [
+    "drl",
+    "deterministic-resolution-layer",
+    "decision-layer",
+    "selection",
+    "ai",
+    "ranking",
+    "consensus"
+  ],
+  "author": "Alexander Shalymenov",
+  "license": "MIT"
+}
