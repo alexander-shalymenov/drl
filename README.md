@@ -1,28 +1,47 @@
 # DRL — Deterministic Resolution Layer
 
+A simple but fundamental pattern:
+
+> Any system that produces multiple outputs must resolve them into exactly one.
+
 **Author: Alexander Shalymenov**
 
 ---
 
 ## What is DRL?
 
-DRL (Deterministic Resolution Layer) is a simple idea:
+DRL (Deterministic Resolution Layer) is a system-level pattern that makes the final decision step explicit.
 
-> Any system that produces multiple possible outputs must resolve them into exactly one final result.
+Every system that produces multiple outputs already contains this step. DRL formalizes it.
 
-DRL makes this step explicit.
+Examples:
+- AI models generate multiple candidates → pick one
+- Search returns many results → rank and show one first
+- Distributed systems see conflicting states → agree on one
+
+---
+
+## Quick Example
+
+```js
+const DRL = require("./drl");
+
+const candidates = [
+  { value: "A", score: 0.7 },
+  { value: "B", score: 0.9 },
+  { value: "C", score: 0.4 }
+];
+
+const result = DRL.resolve(candidates, c => c.score);
+
+console.log(result); // { value: "B", score: 0.9 }
+```
 
 ---
 
 ## The Core Idea
 
-Most systems already do this implicitly:
-
-- AI models generate many candidates → pick one
-- Search returns many results → rank and show one first
-- Distributed systems see conflicting states → agree on one
-
-DRL defines this as a reusable layer:
+Any system can be split into two stages:
 
 ```
 Ω = T(S)
@@ -30,8 +49,14 @@ DRL defines this as a reusable layer:
 ```
 
 - **Ω** — candidate states
+- **T(S)** — generator
 - **F** — resolution function
+- **C** — selection criteria
 - **ω*** — final committed state
+
+Interpretation:
+- generate possibilities
+- resolve exactly one
 
 ---
 
@@ -41,7 +66,7 @@ Without an explicit resolution step:
 
 - outputs remain ambiguous
 - behavior becomes inconsistent
-- systems are harder to test and reproduce
+- systems are harder to test
 
 With DRL:
 
@@ -56,7 +81,7 @@ With DRL:
 ### AI
 - LLM token selection
 - ranking model outputs
-- choosing a single recommendation
+- recommendation systems
 
 ### Distributed Systems
 - consensus (leader election)
@@ -65,7 +90,7 @@ With DRL:
 ### Applications
 - routing decisions
 - matching systems
-- scoring and ranking pipelines
+- scoring pipelines
 
 ---
 
@@ -108,34 +133,33 @@ F(Ω) = resolve_on_demand(Ω, context)
 
 LLM next-token selection:
 
-1. Model produces probabilities over tokens → Ω
+1. Model produces probabilities → Ω
 2. Resolution layer selects one token → ω*
 
 Without DRL:
 - output is a distribution
 
 With DRL:
-- output is a concrete sequence
+- output is a concrete result
 
 ---
 
 ## What DRL Is Not
 
 DRL does not invent:
-
 - ranking algorithms
 - sampling methods
 - consensus protocols
 
-It formalizes the **resolution step** across all of them.
+It formalizes the resolution step across all of them.
 
 ---
 
 ## Repository Structure
 
 - `SPEC.md` — full specification
-- `README.md` — this file
-- `examples/` — practical usage (coming next)
+- `drl.js` — implementation
+- `examples.js` — usage
 
 ---
 
@@ -147,7 +171,7 @@ Version: v1.1.0
 
 ## Attribution
 
-This concept and specification are introduced by **Alexander Shalymenov**.
+This concept is introduced by **Alexander Shalymenov**.
 
 If you use or extend DRL, reference this repository.
 
