@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DRL Actualization Interactive Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 920px;
+      margin: 40px auto;
+      padding: 0 18px;
+      line-height: 1.6;
+      color: #222;
+      background: #fafafa;
+    }
+
+    h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .intro {
+      font-size: 17px;
+      margin-bottom: 24px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      margin-top: 18px;
+      padding: 12px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .result {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .winner {
+      font-weight: bold;
+      font-size: 22px;
+    }
+
+    pre {
+      background: #f2f2f2;
+      padding: 14px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .note {
+      background: #fff7d6;
+      border: 1px solid #ead27a;
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 18px;
+    }
+
+    .small {
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+<h1>DRL Actualization Interactive Demo</h1>
+
+<p class="intro">
+  This demo shows the difference between simple probability selection and DRL actualization.
+  Argmax chooses the most probable option. DRL chooses the option with the lowest cost:
+  <strong>K(ω) - log2(p(ω))</strong>.
+</p>
+
+<div class="grid">
+  <div class="box">
+    <h2>Candidate A</h2>
+
+    <label for="valueA">Value</label>
+    <input id="valueA" value="A">
+
+    <label for="probA">Probability</label>
+    <input id="probA" type="number" step="0.01" min="0.01" max="1" value="0.33">
+  </div>
+
+  <div class="box">
+    <h2>Candidate B</h2>
+
+    <label for="valueB">Value</label>
+    <input id="valueB" value="VeryLongComplexAnswer">
+
+    <label for="probB">Probability</label>
+    <input id="probB" type="number" step="0.01" min="0.01" max="1" value="0.34">
+  </div>
+</div>
+
+<button onclick="runDemo()">Run actualization</button>
+<button onclick="randomize()">Randomize example</button>
+<button onclick="resetDemo()">Reset</button>
+
+<div class="grid" style="margin-top: 18px;">
+  <div class="box">
+    <h2>Selection result</h2>
+
+    <p class="result">
+      Argmax chooses:
+      <span id="argmaxWinner" class="winner"></span>
+    </p>
+
+    <p class="result">
+      DRL actualization chooses:
+      <span id="drlWinner" class="winner"></span>
+    </p>
+
+    <div class="note" id="meaning"></div>
+  </div>
+
+  <div class="box">
+    <h2>Cost calculation</h2>
+    <pre id="details"></pre>
+  </div>
+</div>
+
+<div class="box" style="margin-top: 18px;">
+  <h2>What this means</h2>
+  <p>
+    This demo makes one point clear: the most probable candidate is not always the final committed state.
+    DRL balances probability with description complexity.
+  </p>
+  <p class="small">
+    For browser simplicity, K(ω) is approximated by string length in this demo.
+    In the Node.js implementation, K(ω) can be approximated by compressed byte length.
+  </p>
+</div>
+
+<script>
+function complexity(value) {
+  return String(value).length;
+}
+
+function cost(candidate) {
+  return complexity(candidate.value) - Math.log2(candidate.prob);
+}
+
+function argmax(candidates) {
+  return candidates.reduce((best, current) => {
+    return current.prob > best.prob ? current : best;
+  });
+}
+
+function actualize(candidates) {
+  return candidates.reduce((best, current) => {
+    return cost(current) < cost(best) ? current : best;
+  });
+}
+
+function getCandidates() {
+  const a = {
+    name: "A",
+    value: document.getElementById("valueA").value,
+    prob: Number(document.getElementById("probA").value)
+  };
+
+  const b = {
+    name: "B",
+    value: document.getElementById("valueB").value,
+    prob: Number(document.getElementById("probB").value)
+  };
+
+  return [a, b];
+}
+
+function runDemo() {
+  const candidates = getCandidates();
+
+  if (candidates.some(c => !c.value || !Number.isFinite(c.prob) || c.prob <= 0)) {
+    alert("Please enter text values and probabilities greater than 0.");
+    return;
+  }
+
+  const argmaxResult = argmax(candidates);
+  const drlResult = actualize(candidates);
+
+  document.getElementById("argmaxWinner").textContent =
+    argmaxResult.name + " (" + argmaxResult.value + ")";
+
+  document.getElementById("drlWinner").textContent =
+    drlResult.name + " (" + drlResult.value + ")";
+
+  const details = candidates.map(c => {
+    return [
+      "Candidate " + c.name + ":",
+      "value: " + c.value,
+      "probability: " + c.prob,
+      "K approximation: " + complexity(c.value),
+      "-log2(p): " + (-Math.log2(c.prob)).toFixed(4),
+      "cost = K - log2(p): " + cost(c).toFixed(4)
+    ].join("\n");
+  }).join("\n\n");
+
+  document.getElementById("details").textContent = details;
+
+  const meaning = document.getElementById("meaning");
+
+  if (argmaxResult.name !== drlResult.name) {
+    meaning.innerHTML =
+      "<strong>Important:</strong> Argmax and DRL selected different candidates. " +
+      "This shows that probability alone does not fully determine the final committed state.";
+  } else {
+    meaning.innerHTML =
+      "<strong>Note:</strong> Argmax and DRL selected the same candidate here. " +
+      "Try lowering the probability of the short value or increasing the probability of the long value.";
+  }
+}
+
+function randomize() {
+  const shortValues = ["A", "OK", "Yes", "1", "."];
+  const longValues = [
+    "VeryLongComplexAnswer",
+    "HighlyDetailedAlternativeState",
+    "ComplexGeneratedCandidate",
+    "BBBBBBBBBBBBBBBBBBBBBBBB",
+    "LongUnstablePredictionResult"
+  ];
+
+  document.getElementById("valueA").value =
+    shortValues[Math.floor(Math.random() * shortValues.length)];
+
+  document.getElementById("valueB").value =
+    longValues[Math.floor(Math.random() * longValues.length)];
+
+  document.getElementById("probA").value =
+    (Math.random() * 0.35 + 0.20).toFixed(2);
+
+  document.getElementById("probB").value =
+    (Math.random() * 0.35 + 0.30).toFixed(2);
+
+  runDemo();
+}
+
+function resetDemo() {
+  document.getElementById("valueA").value = "A";
+  document.getElementById("probA").value = "0.33";
+  document.getElementById("valueB").value = "VeryLongComplexAnswer";
+  document.getElementById("probB").value = "0.34";
+  runDemo();
+}
+
+runDemo();
+</script>
+
+</body>
+</html>
