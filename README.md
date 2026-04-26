@@ -1,6 +1,6 @@
 # DRL — Deterministic Resolution Layer
 
-A simple but fundamental pattern:
+A simple but fundamental pattern for turning multiple possible outputs into one committed result.
 
 > Any system that produces multiple outputs must resolve them into exactly one.
 
@@ -68,6 +68,8 @@ DRL can implement the informational actualism principle:
 ω* = arg min (K(ω) - log2(p(ω)))
 ```
 
+This defines a deterministic actualization rule based on information cost.
+
 Where:
 - **K(ω)** is the complexity of a candidate state
 - **p(ω)** is the probability of that candidate state
@@ -81,6 +83,30 @@ const result = DRL.actualize(candidates, "prob", c => c.value);
 ```
 
 This is different from simple argmax. A candidate with slightly lower probability can still be selected if its description complexity is lower enough.
+
+---
+
+## Interactive Demo
+
+An interactive browser demo is included:
+
+examples/actualization-demo.html
+
+You can open this file directly in your browser to experiment with different values and probabilities.
+
+It shows in real time:
+
+- what argmax would choose
+- what DRL actualization chooses
+- how the cost is calculated
+
+---
+
+## Note on Complexity Approximation
+
+The browser demo uses string length as a simple approximation of K(ω).
+
+The main Node.js implementation can use compression-based complexity (e.g., zlib).
 
 ---
 
@@ -191,6 +217,7 @@ It formalizes the resolution step across all of them.
 - `SPEC.md` — full specification
 - `drl.js` — implementation
 - `examples.js` — usage
+- `examples/actualization-demo.html` — interactive demo
 
 ---
 
