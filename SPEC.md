@@ -37,16 +37,41 @@ Interpretation:
 
 ---
 
-## 3. Definition
+## 3. Informational Actualism Resolution
+
+DRL can implement the informational actualism principle:
+
+ω* = arg min (K(ω) - log2(p(ω)))
+
+Where:
+- K(ω) = complexity of the candidate state
+- p(ω) = probability of the candidate state
+- K(ω) is approximated in this implementation by zlib compressed byte length
+- the selected candidate is the one with the lowest actualism cost
+
+This makes DRL not only a general resolution layer, but also a direct computable implementation of the transition from candidate states Ω to one committed state ω* under the informational actualism criterion.
+
+---
+
+## 4. Definition
 
 Resolve(Candidates, Criteria) → CommittedState
 
 Constraint:
 - exactly one output must be returned
 
+Informational actualism form:
+
+Actualize(Candidates, Probability, Complexity) → CommittedState
+
+Constraint:
+- exactly one output must be returned
+- every candidate must have p(ω) > 0
+- the selected output must minimize K(ω) - log2(p(ω))
+
 ---
 
-## 4. Requirements
+## 5. Requirements
 
 1. DRL must be explicitly defined in system architecture
 2. DRL must produce exactly one committed output
@@ -55,10 +80,11 @@ Constraint:
 5. DRL must be deterministic or controlled probabilistic
    - deterministic: same input and criteria → same output
    - controlled probabilistic: randomness is bounded by explicit policy
+6. When using informational actualism mode, DRL must compute a cost for each candidate and select the minimum cost candidate
 
 ---
 
-## 5. Failure Without DRL
+## 6. Failure Without DRL
 
 If DRL is absent:
 
@@ -68,7 +94,16 @@ If DRL is absent:
 
 ---
 
-## 6. Implementation Patterns
+## 7. Implementation Patterns
+
+### Informational actualism
+F(Ω) = argmin(K(ω) - log2(p(ω)))
+
+Example:
+- candidate outputs → compute complexity and probability cost → choose the minimum cost committed state
+- LLM token selection → combine token probability with token description complexity
+
+---
 
 ### Argmax
 F(Ω) = argmax(score(ω))
@@ -106,7 +141,7 @@ Example:
 
 ---
 
-## 7. Domains
+## 8. Domains
 
 - AI systems (LLM decoding, ranking, inference resolution)
 - distributed systems (consensus, replication)
@@ -115,7 +150,7 @@ Example:
 
 ---
 
-## 8. Practical Impact (AI Focus)
+## 9. Practical Impact (AI Focus)
 
 In AI systems, DRL directly models the final decision step that converts probabilistic outputs into concrete results.
 
@@ -133,9 +168,11 @@ Without an explicit resolution layer:
 
 DRL provides a formal way to isolate and control this step.
 
+With informational actualism mode, DRL can also select by minimizing K(ω) - log2(p(ω)), instead of relying only on argmax, sampling, or a manually defined score.
+
 ---
 
-## 9. Non-Goals
+## 10. Non-Goals
 
 DRL does not claim:
 
@@ -148,19 +185,20 @@ DRL formalizes these as instances of a common resolution layer.
 
 ---
 
-## 10. Original Contribution
+## 11. Original Contribution
 
 This document formalizes DRL as:
 
 - an explicit architectural layer separating generation from resolution
 - a universal pattern underlying selection, ranking, and consensus
 - a cross-domain abstraction linking AI, distributed systems, and simulation
+- a direct computable implementation path for informational actualism through the formula K(ω) - log2(p(ω))
 
 The contribution is not the invention of selection methods, but the formalization of resolution as a required system layer.
 
 ---
 
-## 11. Attribution and Version
+## 12. Attribution and Version
 
 Author:
 Alexander Shalymenov
@@ -169,7 +207,6 @@ This specification establishes DRL as a formal architectural abstraction and sho
 
 ---
 
-## 12. Version
+## 13. Version
 
 v1.1.0
-

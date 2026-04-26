@@ -7,7 +7,78 @@
  * into exactly one committed result.
  */
 
+const zlib = require("zlib");
+
 class DRL {
+  /**
+   * Approximate Kolmogorov complexity K(ω).
+   * Uses zlib compressed byte length as a practical LZ-based approximation.
+   *
+   * @param {unknown} value
+   * @returns {number}
+   */
+  static complexity(value) {
+    const text = typeof value === "string" ? value : JSON.stringify(value);
+    return zlib.deflateSync(Buffer.from(text, "utf8")).length;
+  }
+
+  /**
+   * Compute the informational actualism cost:
+   * C(ω) = K(ω) - log2(p(ω))
+   *
+   * Lower cost is better.
+   *
+   * @param {unknown} value
+   * @param {number} probability
+   * @returns {number}
+   */
+  static actualismCost(value, probability) {
+    const p = Number(probability);
+
+    if (!Number.isFinite(p) || p <= 0 || p > 1) {
+      throw new Error("DRL.actualismCost: probability must be greater than 0 and less than or equal to 1.");
+    }
+
+    return DRL.complexity(value) - Math.log2(p);
+  }
+
+  /**
+   * Resolve by the informational actualism formula:
+   * ω* = arg min (K(ω) - log2(p(ω)))
+   *
+   * Each candidate must contain a probability field.
+   * By default, the candidate value itself is used for K(ω).
+   * A valueFn can be provided to select what should be measured as ω.
+   *
+   * @template T
+   * @param {T[]} candidates
+   * @param {keyof T} probKey
+   * @param {(candidate: T) => unknown} [valueFn]
+   * @returns {T}
+   */
+  static actualize(candidates, probKey = "prob", valueFn = candidate => candidate) {
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      throw new Error("DRL.actualize: candidates must be a non-empty array.");
+    }
+
+    if (typeof valueFn !== "function") {
+      throw new Error("DRL.actualize: valueFn must be a function.");
+    }
+
+    let best = candidates[0];
+    let bestCost = DRL.actualismCost(valueFn(best), best[probKey]);
+
+    for (let i = 1; i < candidates.length; i++) {
+      const cost = DRL.actualismCost(valueFn(candidates[i]), candidates[i][probKey]);
+      if (cost < bestCost) {
+        best = candidates[i];
+        bestCost = cost;
+      }
+    }
+
+    return best;
+  }
+
   /**
    * Resolve by score.
    * Returns exactly one committed candidate.

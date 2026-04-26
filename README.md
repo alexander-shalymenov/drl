@@ -27,14 +27,14 @@ Examples:
 const DRL = require("./drl");
 
 const candidates = [
-  { value: "A", score: 0.7 },
-  { value: "B", score: 0.9 },
-  { value: "C", score: 0.4 }
+  { value: "A", prob: 0.33 },
+  { value: "ComplexAlternativeValue", prob: 0.34 },
+  { value: "BBBBBBBBBBBBBBBBBBBBBBBB", prob: 0.33 }
 ];
 
-const result = DRL.resolve(candidates, c => c.score);
+const result = DRL.actualize(candidates, "prob", c => c.value);
 
-console.log(result); // { value: "B", score: 0.9 }
+console.log(result); // { value: "A", prob: 0.33 }
 ```
 
 ---
@@ -60,6 +60,30 @@ Interpretation:
 
 ---
 
+## Informational Actualism Resolution
+
+DRL can implement the informational actualism principle:
+
+```
+ω* = arg min (K(ω) - log2(p(ω)))
+```
+
+Where:
+- **K(ω)** is the complexity of a candidate state
+- **p(ω)** is the probability of that candidate state
+- **K(ω)** is approximated in this implementation by zlib compressed byte length
+- the candidate with the lowest cost becomes the committed state
+
+In code:
+
+```js
+const result = DRL.actualize(candidates, "prob", c => c.value);
+```
+
+This is different from simple argmax. A candidate with slightly lower probability can still be selected if its description complexity is lower enough.
+
+---
+
 ## Why It Matters
 
 Without an explicit resolution step:
@@ -73,6 +97,7 @@ With DRL:
 - decision logic is isolated
 - systems become predictable
 - behavior becomes testable
+- the transition from candidate states to one committed state becomes explicit
 
 ---
 
@@ -107,6 +132,11 @@ Constraint:
 
 ## Common Patterns
 
+**Informational actualism**
+```
+F(Ω) = argmin(K(ω) - log2(p(ω)))
+```
+
 **Argmax**
 ```
 F(Ω) = argmax(score(ω))
@@ -134,7 +164,8 @@ F(Ω) = resolve_on_demand(Ω, context)
 LLM next-token selection:
 
 1. Model produces probabilities → Ω
-2. Resolution layer selects one token → ω*
+2. DRL applies a resolution rule → ω*
+3. With informational actualism, the rule is `arg min (K(ω) - log2(p(ω)))`
 
 Without DRL:
 - output is a distribution
@@ -174,4 +205,3 @@ Version: v1.1.0
 This concept is introduced by **Alexander Shalymenov**.
 
 If you use or extend DRL, reference this repository.
-

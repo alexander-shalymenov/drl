@@ -1,6 +1,27 @@
 const DRL = require("./drl");
 
-console.log("=== Example 1: AI token selection by score ===");
+console.log("=== Example 1: Informational actualism symbol selection ===");
+
+const symbolCandidates = [
+  { value: "A", prob: 0.33 },
+  { value: "ComplexAlternativeValue", prob: 0.34 },
+  { value: "BBBBBBBBBBBBBBBBBBBBBBBB", prob: 0.33 }
+];
+
+const actualizedSymbol = DRL.actualize(symbolCandidates, "prob", c => c.value);
+console.log("Actualized symbol:", actualizedSymbol);
+
+console.log("Costs:");
+for (const candidate of symbolCandidates) {
+  console.log({
+    value: candidate.value,
+    prob: candidate.prob,
+    complexity: DRL.complexity(candidate.value),
+    cost: DRL.actualismCost(candidate.value, candidate.prob)
+  });
+}
+
+console.log("\n=== Example 2: AI token selection by score ===");
 
 const tokenCandidates = [
   { token: "Yes", score: 0.62 },
@@ -11,7 +32,7 @@ const tokenCandidates = [
 const chosenToken = DRL.resolve(tokenCandidates, c => c.score);
 console.log("Chosen token:", chosenToken);
 
-console.log("\n=== Example 2: Recommendation selection ===");
+console.log("\n=== Example 3: Recommendation selection ===");
 
 const recommendations = [
   { id: "A", relevance: 0.74, freshness: 0.60 },
@@ -25,7 +46,7 @@ const bestRecommendation = DRL.resolve(
 );
 console.log("Best recommendation:", bestRecommendation);
 
-console.log("\n=== Example 3: Distributed state conflict ===");
+console.log("\n=== Example 4: Distributed state conflict ===");
 
 const states = [
   { value: "old", timestamp: 1713200000 },
@@ -35,7 +56,7 @@ const states = [
 const latestState = DRL.latest(states, "timestamp");
 console.log("Committed state:", latestState);
 
-console.log("\n=== Example 4: Probabilistic sampling ===");
+console.log("\n=== Example 5: Probabilistic sampling ===");
 
 const nextTokens = [
   { token: "the", prob: 0.5 },
