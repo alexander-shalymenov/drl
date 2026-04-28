@@ -1,3 +1,5 @@
+# [Run Live Simulation Here](https://alexander-shalymenov.github.io/drl/examples/actualization-demo.html)
+
 # DRL — Deterministic Resolution Layer
 
 A simple but fundamental pattern for turning multiple possible outputs into one committed result.
