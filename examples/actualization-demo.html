@@ -2,7 +2,939 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
   <title>DRL Actualization Interactive Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --panel: #ffffff;
+      --line: #d8dde6;
+      --text: #111111;
+      --muted: #4f5965;
+      --soft: #eef2f6;
+      --blue: #e8f1ff;
+      --blue-border: #4f86e8;
+      --green: #e7f7ee;
+      --green-border: #2fb463;
+      --yellow: #fff5d8;
+      --yellow-border: #e1b934;
+      --red: #fff0f0;
+      --red-border: #df6666;
+      --purple: #f0e9ff;
+      --purple-border: #9b6be8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0 0 10px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .note {
+      background: var(--yellow);
+      border: 1px solid var(--yellow-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .simple-flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .flow-card {
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .flow-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #ffffff;
+      color: #111111;
+    }
+
+    button.primary {
+      background: #111111;
+      color: #ffffff;
+      border-color: #111111;
+      font-size: 17px;
+      padding: 14px 20px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .status {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      font-weight: 700;
+    }
+
+    .status.done {
+      background: var(--yellow);
+      border-color: var(--yellow-border);
+    }
+
+    .status.error {
+      background: var(--red);
+      border-color: var(--red-border);
+    }
+
+    .candidate-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .candidate-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .candidate-card.probability-winner {
+      background: var(--blue);
+      border-color: var(--blue-border);
+      box-shadow: 0 0 0 2px rgba(79, 134, 232, 0.12);
+    }
+
+    .candidate-card.final-winner {
+      background: var(--green);
+      border-color: var(--green-border);
+      box-shadow: 0 0 0 2px rgba(47, 180, 99, 0.12);
+    }
+
+    .candidate-card.both-winner {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      border-color: var(--green-border);
+      box-shadow: 0 0 0 2px rgba(47, 180, 99, 0.14);
+    }
+
+    .candidate-card.tie-candidate {
+      background: var(--purple);
+      border-color: var(--purple-border);
+      box-shadow: 0 0 0 2px rgba(155, 107, 232, 0.12);
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .field-note {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid #cfd6df;
+      border-radius: 9px;
+      padding: 11px;
+      font-size: 15px;
+      background: #ffffff;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .result-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 150px;
+    }
+
+    .result-value {
+      margin-top: 12px;
+      font-size: 28px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .placeholder {
+      color: var(--muted);
+      font-size: 17px;
+      font-weight: 400;
+    }
+
+    .why-box {
+      background: var(--panel);
+      border-left: 5px solid #111111;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      font-size: 17px;
+    }
+
+    .comparison-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .comparison-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .comparison-card.argmax {
+      background: var(--blue);
+      border-color: var(--blue-border);
+    }
+
+    .comparison-card.actualization {
+      background: var(--green);
+      border-color: var(--green-border);
+    }
+
+    .calculation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .calc-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .calc-card.final {
+      background: var(--green);
+      border-color: var(--green-border);
+    }
+
+    .calc-card.prob {
+      background: var(--blue);
+      border-color: var(--blue-border);
+    }
+
+    .calc-card.tie {
+      background: var(--purple);
+      border-color: var(--purple-border);
+    }
+
+    .calc-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .calc-line:last-child {
+      border-bottom: 0;
+    }
+
+    .calc-line strong {
+      text-align: right;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    th,
+    td {
+      padding: 13px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      font-size: 14px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    tr.final-row {
+      background: var(--green);
+      font-weight: 700;
+    }
+
+    tr.prob-row {
+      background: var(--blue);
+    }
+
+    tr.tie-row {
+      background: var(--purple);
+    }
+
+    code {
+      display: inline-block;
+      background: #f2f4f7;
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 15px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .simple-flow,
+      .candidate-grid,
+      .results,
+      .comparison-box,
+      .calculation-grid,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .page {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="panel">
+      <h1>Actualization Demo</h1>
+      <p class="muted">
+        This page shows how several possible answers become one final answer.
+      </p>
+
+      <div class="note">
+        <strong>This demo does not judge meaning.</strong>
+        It does not know which answer is true, useful, beautiful, or smart.
+        It only compares two measurable things: probability and text length.
+      </div>
+
+      <div class="simple-flow">
+        <div class="flow-card">
+          <strong>1. Possible answers</strong>
+          Three candidates are listed below.
+        </div>
+        <div class="flow-card">
+          <strong>2. Simple choice</strong>
+          Argmax chooses only the highest probability.
+        </div>
+        <div class="flow-card">
+          <strong>3. Actualization</strong>
+          The final answer is selected by the lowest total cost.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Main action</h2>
+      <div class="button-row">
+        <button class="primary" type="button" onclick="selectFinalAnswer()">Select one final answer</button>
+        <button type="button" onclick="loadAnotherExample()">Load another example</button>
+        <button type="button" onclick="resetToStart()">Reset to start</button>
+      </div>
+
+      <div id="status" class="status">
+        No result selected yet. Press the black button to calculate the final answer.
+      </div>
+    </section>
+
+    <section class="candidate-grid">
+      <div id="cardA" class="candidate-card">
+        <h2>Candidate A</h2>
+
+        <label for="valueA">Answer text</label>
+        <input id="valueA" value="OK">
+
+        <label for="probA">Manual probability</label>
+        <input id="probA" type="number" step="0.01" min="0.01" max="1" value="0.29">
+        <p class="field-note">For this demo only. You enter this number manually.</p>
+      </div>
+
+      <div id="cardB" class="candidate-card">
+        <h2>Candidate B</h2>
+
+        <label for="valueB">Answer text</label>
+        <input id="valueB" value="DetailedGeneratedResponse">
+
+        <label for="probB">Manual probability</label>
+        <input id="probB" type="number" step="0.01" min="0.01" max="1" value="0.30">
+        <p class="field-note">In a real AI system, this would usually come from the model.</p>
+      </div>
+
+      <div id="cardC" class="candidate-card">
+        <h2>Candidate C</h2>
+
+        <label for="valueC">Answer text</label>
+        <input id="valueC" value="ShortAnswer">
+
+        <label for="probC">Manual probability</label>
+        <input id="probC" type="number" step="0.01" min="0.01" max="1" value="0.30">
+        <p class="field-note">Values do not need to add up to exactly 1 in this visual demo.</p>
+      </div>
+    </section>
+
+    <section class="results">
+      <div class="result-card">
+        <h2>Argmax result</h2>
+        <p class="muted">Argmax means: choose the candidate with the highest probability only.</p>
+        <div id="probabilityResult" class="result-value placeholder">Not selected yet</div>
+      </div>
+
+      <div class="result-card">
+        <h2>Actualization result</h2>
+        <p class="muted">Actualization means: choose the candidate with the lowest total cost.</p>
+        <div id="finalResult" class="result-value placeholder">Not selected yet</div>
+      </div>
+    </section>
+
+    <section id="whyBox" class="why-box">
+      No calculation has been run yet.
+    </section>
+
+    <section class="comparison-box">
+      <div class="comparison-card argmax">
+        <h2>What Argmax Does</h2>
+        <p>
+          Argmax ignores text length. It only looks at probability.
+          If Candidate B has the highest probability, Argmax selects Candidate B.
+        </p>
+      </div>
+
+      <div class="comparison-card actualization">
+        <h2>What Actualization Does</h2>
+        <p>
+          Actualization compares probability and text length together.
+          It selects the candidate with the lowest total cost.
+        </p>
+      </div>
+    </section>
+
+    <section id="calculationGrid" class="calculation-grid"></section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Answer text</th>
+          <th>Probability</th>
+          <th>Text length</th>
+          <th>Probability penalty</th>
+          <th>Total cost</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr>
+          <td colspan="7">Press Select one final answer to calculate the result.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <section class="panel">
+      <h2>How the final answer is selected</h2>
+      <p>
+        Each candidate gets a total cost. The lowest total cost wins.
+      </p>
+      <p><code>Total cost = text length + probability penalty</code></p>
+      <p>
+        Text length means how many characters are in the answer.
+        Probability penalty is lower when probability is higher.
+      </p>
+      <p class="muted">
+        If two candidates have the same total cost, this demo uses a tie-breaker:
+        it selects the first candidate among the tied candidates.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Where probability comes from</h2>
+      <div class="two-col">
+        <div>
+          <h3>In this demo</h3>
+          <p>
+            Probability is entered manually. The page does not calculate it by itself.
+            The demo is only showing how the final selection rule works.
+          </p>
+        </div>
+
+        <div>
+          <h3>In a smarter version</h3>
+          <p>
+            Probability would come from a model, search system, scoring engine, or another generator.
+            The user would not type probability manually.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Example of a smarter version</h2>
+      <p>
+        An AI model could generate several possible answers and attach confidence scores to them.
+        A search engine could generate several results and attach relevance scores.
+        A routing system could generate several routes and attach success scores.
+      </p>
+      <p>
+        Actualization starts after that. It takes those possible outputs and commits to one final output.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const EPSILON = 0.000001;
+
+    function textLength(value) {
+      return String(value).length;
+    }
+
+    function probabilityPenalty(probability) {
+      return -Math.log2(probability);
+    }
+
+    function totalCost(candidate) {
+      return textLength(candidate.value) + probabilityPenalty(candidate.prob);
+    }
+
+    function getCandidates() {
+      return [
+        {
+          key: "A",
+          label: "Candidate A",
+          cardId: "cardA",
+          value: document.getElementById("valueA").value.trim(),
+          prob: Number(document.getElementById("probA").value)
+        },
+        {
+          key: "B",
+          label: "Candidate B",
+          cardId: "cardB",
+          value: document.getElementById("valueB").value.trim(),
+          prob: Number(document.getElementById("probB").value)
+        },
+        {
+          key: "C",
+          label: "Candidate C",
+          cardId: "cardC",
+          value: document.getElementById("valueC").value.trim(),
+          prob: Number(document.getElementById("probC").value)
+        }
+      ];
+    }
+
+    function validateCandidates(candidates) {
+      for (const candidate of candidates) {
+        if (!candidate.value) {
+          return "Please enter answer text for every candidate.";
+        }
+
+        if (!Number.isFinite(candidate.prob) || candidate.prob <= 0 || candidate.prob > 1) {
+          return "Please enter probabilities greater than 0 and less than or equal to 1.";
+        }
+      }
+
+      return "";
+    }
+
+    function findArgmaxWinner(candidates) {
+      return candidates.reduce((best, current) => {
+        return current.prob > best.prob ? current : best;
+      });
+    }
+
+    function findLowestCostCandidates(candidates) {
+      const costs = candidates.map(candidate => totalCost(candidate));
+      const lowestCost = Math.min(...costs);
+
+      return candidates.filter(candidate => {
+        return Math.abs(totalCost(candidate) - lowestCost) < EPSILON;
+      });
+    }
+
+    function findActualizationWinner(candidates) {
+      return findLowestCostCandidates(candidates)[0];
+    }
+
+    function clearHighlights() {
+      ["cardA", "cardB", "cardC"].forEach(id => {
+        const card = document.getElementById(id);
+        card.classList.remove("probability-winner", "final-winner", "both-winner", "tie-candidate");
+      });
+    }
+
+    function applyHighlights(argmaxWinner, actualizationWinner, tiedLowestCostCandidates) {
+      clearHighlights();
+
+      if (tiedLowestCostCandidates.length > 1) {
+        tiedLowestCostCandidates.forEach(candidate => {
+          document.getElementById(candidate.cardId).classList.add("tie-candidate");
+        });
+      }
+
+      if (argmaxWinner.key === actualizationWinner.key) {
+        document.getElementById(actualizationWinner.cardId).classList.add("both-winner");
+        return;
+      }
+
+      document.getElementById(argmaxWinner.cardId).classList.add("probability-winner");
+      document.getElementById(actualizationWinner.cardId).classList.add("final-winner");
+    }
+
+    function updateStatus(text, type) {
+      const status = document.getElementById("status");
+      status.textContent = text;
+      status.className = "status";
+
+      if (type === "done") {
+        status.classList.add("done");
+      }
+
+      if (type === "error") {
+        status.classList.add("error");
+      }
+    }
+
+    function updateResults(argmaxWinner, actualizationWinner) {
+      const probabilityResult = document.getElementById("probabilityResult");
+      const finalResult = document.getElementById("finalResult");
+
+      probabilityResult.classList.remove("placeholder");
+      finalResult.classList.remove("placeholder");
+
+      probabilityResult.textContent = argmaxWinner.label + ": " + argmaxWinner.value;
+      finalResult.textContent = actualizationWinner.label + ": " + actualizationWinner.value;
+    }
+
+    function updateWhyBox(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates) {
+      const whyBox = document.getElementById("whyBox");
+
+      if (tiedLowestCostCandidates.length > 1) {
+        const tiedNames = tiedLowestCostCandidates.map(candidate => candidate.label).join(" and ");
+
+        whyBox.textContent =
+          tiedNames + " have the same lowest total cost: " +
+          totalCost(actualizationWinner).toFixed(4) + ". " +
+          actualizationWinner.label + " was selected because it appears first among the tied candidates.";
+        return;
+      }
+
+      const finalText =
+        actualizationWinner.label + " was selected because it has the lowest total cost: " +
+        totalCost(actualizationWinner).toFixed(4) + ".";
+
+      if (argmaxWinner.key === actualizationWinner.key) {
+        whyBox.textContent =
+          finalText + " It is also the Argmax result because it has the highest probability.";
+        return;
+      }
+
+      whyBox.textContent =
+        finalText + " " +
+        argmaxWinner.label + " is the Argmax result because it has the highest probability, but its total cost is higher.";
+    }
+
+    function updateCalculationCards(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates) {
+      const grid = document.getElementById("calculationGrid");
+      const tiedKeys = tiedLowestCostCandidates.map(candidate => candidate.key);
+
+      grid.innerHTML = candidates.map(candidate => {
+        const isArgmaxWinner = candidate.key === argmaxWinner.key;
+        const isActualizationWinner = candidate.key === actualizationWinner.key;
+        const isTiedLowestCost = tiedKeys.includes(candidate.key) && !isActualizationWinner;
+
+        let className = "calc-card";
+        if (isActualizationWinner) {
+          className += " final";
+        } else if (isTiedLowestCost) {
+          className += " tie";
+        } else if (isArgmaxWinner) {
+          className += " prob";
+        }
+
+        let label = "Not selected";
+        if (isArgmaxWinner && isActualizationWinner) {
+          label = "Argmax result and actualization result";
+        } else if (isActualizationWinner && tiedLowestCostCandidates.length > 1) {
+          label = "Selected by tie-breaker";
+        } else if (isActualizationWinner) {
+          label = "Actualization result";
+        } else if (isTiedLowestCost) {
+          label = "Tied lowest cost, not selected";
+        } else if (isArgmaxWinner) {
+          label = "Argmax result only";
+        }
+
+        return [
+          "<div class=\"" + className + "\">",
+          "<h3>" + candidate.label + "</h3>",
+          "<div class=\"calc-line\"><span>Text</span><strong>" + escapeHtml(candidate.value) + "</strong></div>",
+          "<div class=\"calc-line\"><span>Text length</span><strong>" + textLength(candidate.value) + "</strong></div>",
+          "<div class=\"calc-line\"><span>Probability</span><strong>" + candidate.prob.toFixed(2) + "</strong></div>",
+          "<div class=\"calc-line\"><span>Probability penalty</span><strong>" + probabilityPenalty(candidate.prob).toFixed(4) + "</strong></div>",
+          "<div class=\"calc-line\"><span>Total cost</span><strong>" + totalCost(candidate).toFixed(4) + "</strong></div>",
+          "<div class=\"calc-line\"><span>Result</span><strong>" + label + "</strong></div>",
+          "</div>"
+        ].join("");
+      }).join("");
+    }
+
+    function updateTable(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates) {
+      const tableBody = document.getElementById("tableBody");
+      const tiedKeys = tiedLowestCostCandidates.map(candidate => candidate.key);
+
+      tableBody.innerHTML = candidates.map(candidate => {
+        const isArgmaxWinner = candidate.key === argmaxWinner.key;
+        const isActualizationWinner = candidate.key === actualizationWinner.key;
+        const isTiedLowestCost = tiedKeys.includes(candidate.key) && !isActualizationWinner;
+
+        let resultText = "Not selected";
+        if (isArgmaxWinner && isActualizationWinner) {
+          resultText = "Argmax result and actualization result";
+        } else if (isActualizationWinner && tiedLowestCostCandidates.length > 1) {
+          resultText = "Selected by tie-breaker";
+        } else if (isActualizationWinner) {
+          resultText = "Actualization result";
+        } else if (isTiedLowestCost) {
+          resultText = "Tied lowest cost, not selected";
+        } else if (isArgmaxWinner) {
+          resultText = "Argmax result only";
+        }
+
+        let rowClass = "";
+        if (isActualizationWinner) {
+          rowClass = "final-row";
+        } else if (isTiedLowestCost) {
+          rowClass = "tie-row";
+        } else if (isArgmaxWinner) {
+          rowClass = "prob-row";
+        }
+
+        return [
+          "<tr class=\"" + rowClass + "\">",
+          "<td>" + candidate.label + "</td>",
+          "<td>" + escapeHtml(candidate.value) + "</td>",
+          "<td>" + candidate.prob.toFixed(2) + "</td>",
+          "<td>" + textLength(candidate.value) + "</td>",
+          "<td>" + probabilityPenalty(candidate.prob).toFixed(4) + "</td>",
+          "<td>" + totalCost(candidate).toFixed(4) + "</td>",
+          "<td>" + resultText + "</td>",
+          "</tr>"
+        ].join("");
+      }).join("");
+    }
+
+    function selectFinalAnswer() {
+      const candidates = getCandidates();
+      const error = validateCandidates(candidates);
+
+      if (error) {
+        updateStatus(error, "error");
+        return;
+      }
+
+      const argmaxWinner = findArgmaxWinner(candidates);
+      const tiedLowestCostCandidates = findLowestCostCandidates(candidates);
+      const actualizationWinner = findActualizationWinner(candidates);
+
+      applyHighlights(argmaxWinner, actualizationWinner, tiedLowestCostCandidates);
+      updateResults(argmaxWinner, actualizationWinner);
+      updateWhyBox(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates);
+      updateCalculationCards(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates);
+      updateTable(candidates, argmaxWinner, actualizationWinner, tiedLowestCostCandidates);
+
+      updateStatus("One final answer selected: " + actualizationWinner.label + ".", "done");
+    }
+
+    function loadAnotherExample() {
+      const examples = [
+        [
+          { value: "OK", prob: 0.29 },
+          { value: "DetailedGeneratedResponse", prob: 0.30 },
+          { value: "ShortAnswer", prob: 0.30 }
+        ],
+        [
+          { value: "Yes", prob: 0.28 },
+          { value: "LongGeneratedAlternative", prob: 0.43 },
+          { value: "Maybe", prob: 0.29 }
+        ],
+        [
+          { value: "Fast", prob: 0.31 },
+          { value: "ExtremelyDetailedModelOutput", prob: 0.40 },
+          { value: "Clear", prob: 0.29 }
+        ],
+        [
+          { value: "OK", prob: 0.30 },
+          { value: "De", prob: 0.30 },
+          { value: "ShortAnswer", prob: 0.30 }
+        ],
+        [
+          { value: "A", prob: 0.25 },
+          { value: "ComplexAlternativeValue", prob: 0.50 },
+          { value: "Good", prob: 0.25 }
+        ]
+      ];
+
+      const picked = examples[Math.floor(Math.random() * examples.length)];
+
+      document.getElementById("valueA").value = picked[0].value;
+      document.getElementById("probA").value = picked[0].prob.toFixed(2);
+      document.getElementById("valueB").value = picked[1].value;
+      document.getElementById("probB").value = picked[1].prob.toFixed(2);
+      document.getElementById("valueC").value = picked[2].value;
+      document.getElementById("probC").value = picked[2].prob.toFixed(2);
+
+      clearOutput("New example loaded. Press the black button to calculate the final answer.");
+    }
+
+    function resetToStart() {
+      document.getElementById("valueA").value = "OK";
+      document.getElementById("probA").value = "0.29";
+      document.getElementById("valueB").value = "DetailedGeneratedResponse";
+      document.getElementById("probB").value = "0.30";
+      document.getElementById("valueC").value = "ShortAnswer";
+      document.getElementById("probC").value = "0.30";
+
+      clearOutput("Reset complete. No result selected yet.");
+    }
+
+    function clearOutput(statusText) {
+      clearHighlights();
+
+      const probabilityResult = document.getElementById("probabilityResult");
+      const finalResult = document.getElementById("finalResult");
+
+      probabilityResult.className = "result-value placeholder";
+      finalResult.className = "result-value placeholder";
+      probabilityResult.textContent = "Not selected yet";
+      finalResult.textContent = "Not selected yet";
+
+      document.getElementById("whyBox").textContent = "No calculation has been run yet.";
+      document.getElementById("calculationGrid").innerHTML = "";
+
+      document.getElementById("tableBody").innerHTML =
+        "<tr><td colspan=\"7\">Press Select one final answer to calculate the result.</td></tr>";
+
+      updateStatus(statusText, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    ["valueA", "probA", "valueB", "probB", "valueC", "probC"].forEach(id => {
+      document.getElementById(id).addEventListener("input", () => {
+        clearOutput("Values changed. Press the black button again to calculate the final answer.");
+      });
+    });
+  </script>
+</body>
+</html>
+</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
